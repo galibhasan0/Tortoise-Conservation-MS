@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export type UserRole = 
+export type UserRole =
   | 'Admin'
   | 'Supervisor'
   | 'Vet'
@@ -22,59 +22,78 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (username: string, password: string, role: UserRole) => Promise<void>;
+  login: (username: string, password: string, role?: UserRole) => Promise<void>;
   logout: () => void;
   updateProfile: (updates: Partial<User>) => void;
   isAuthenticated: boolean;
+  permissions: string[];
+  hasPermission: (permission: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function mapApiUser(apiUser: any): User {
+  return {
+    id: String(apiUser.user_id),
+    username: apiUser.username,
+    email: apiUser.email ?? `${apiUser.username}@tortoisecare.local`,
+    role: apiUser.role_name as UserRole,
+    fullName: apiUser.full_name ?? apiUser.username,
+    avatar: apiUser.avatar,
+  };
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [permissions, setPermissions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load user from localStorage on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('aura_user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Failed to parse stored user:', error);
-        localStorage.removeItem('aura_user');
-      }
-    }
-    setIsLoading(false);
+    fetch('/api/v1/auth/me', { credentials: 'include' })
+      .then(async (res) => {
+        if (res.ok) {
+          const data = await res.json();
+          setUser(mapApiUser(data.data.user));
+          setPermissions(data.data.permissions ?? []);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
   }, []);
 
-  const login = async (username: string, password: string, role: UserRole) => {
-    // Frontend-only login simulation
-    // In a real app, this would call a backend API
-    const newUser: User = {
-      id: `user_${Date.now()}`,
-      username,
-      email: `${username}@tortoisecare.local`,
-      role,
-      fullName: username.charAt(0).toUpperCase() + username.slice(1),
-    };
-    
-    setUser(newUser);
-    localStorage.setItem('aura_user', JSON.stringify(newUser));
+  const login = async (username: string, password: string, _role?: UserRole) => {
+    const res = await fetch('/api/v1/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ username, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message ?? 'Login failed');
+    }
+
+    setUser(mapApiUser(data.data.user));
+    setPermissions(data.data.permissions ?? []);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
+    } catch {}
     setUser(null);
-    localStorage.removeItem('aura_user');
+    setPermissions([]);
   };
 
   const updateProfile = (updates: Partial<User>) => {
     if (user) {
-      const updatedUser = { ...user, ...updates };
-      setUser(updatedUser);
-      localStorage.setItem('aura_user', JSON.stringify(updatedUser));
+      setUser({ ...user, ...updates });
     }
   };
+
+  const hasPermission = (permission: string) => permissions.includes(permission);
 
   return (
     <AuthContext.Provider
@@ -85,6 +104,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         updateProfile,
         isAuthenticated: !!user,
+        permissions,
+        hasPermission,
       }}
     >
       {children}

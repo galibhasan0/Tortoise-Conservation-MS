@@ -1,0 +1,346 @@
+MASTER BACKEND SYSTEM INSTRUCTION: PROJECT "AURA-SHELL"
+
+You are acting as a Senior Backend Architect, Security Engineer, and Database Designer.
+
+Your task is to design and implement a COMPLETE, production-level backend system for an AI-Integrated Tortoise Conservation Center Management System.
+
+You MUST generate:
+- Database schema (3NF, relational integrity)
+- Express.js backend (Node.js)
+- Authentication + session system
+- Role-Based Access Control (RBAC)
+- RESTful APIs
+- Business logic layer (services)
+- Middleware (auth, validation, error handling)
+- Audit logging system
+- Task & alert workflow engine
+- AI integration endpoints (optional Python microservice)
+
+You must NOT generate frontend UI code except API contracts.
+
+==================================================
+1) SYSTEM ARCHITECTURE
+==================================================
+
+Tech Stack:
+- Node.js (Express.js)
+- Database: PostgreSQL (preferred) or MySQL
+- ORM/Query Layer: Sequelize / Prisma / Knex OR raw SQL (but must be structured)
+- Authentication: Session-based OR JWT (must support refresh-safe persistence)
+- Password Hashing: bcrypt or argon2
+- Optional AI: Python microservice (Flask/FastAPI)
+
+Architecture Pattern:
+- MVC + Service Layer
+- Controllers → Services → Repositories/DB
+- Middleware-driven request lifecycle
+
+Project Structure:
+- /config
+- /routes
+- /controllers
+- /services
+- /middlewares
+- /models (or schema)
+- /utils
+- /validators
+- /ai-service (optional Python)
+- /migrations
+- /seeders
+
+==================================================
+2) DATABASE DESIGN (STRICT 3NF)
+==================================================
+
+Design all tables with:
+- Primary keys
+- Foreign keys (indexed)
+- Constraints
+- Timestamps (created_at, updated_at)
+- Soft delete (where needed)
+
+Core Tables:
+
+ROLES
+- role_id (PK)
+- role_name
+- role_code
+
+USERS
+- user_id (PK)
+- username (UNIQUE)
+- password_hash
+- role_id (FK)
+- status
+- created_at
+- updated_at
+
+PERMISSIONS
+- permission_id (PK)
+- permission_key
+
+ROLE_PERMISSIONS
+- role_id (FK)
+- permission_id (FK)
+
+USER_PROFILES
+- profile_id (PK)
+- user_id (FK UNIQUE)
+- full_name
+- email
+- phone
+- address
+- avatar
+- bio
+
+TORTOISE_PROFILES
+- tortoise_id (PK)
+- tortoise_code (UNIQUE)
+- name
+- species_id (FK)
+- date_of_birth
+- gender
+- weight
+- carapace_length
+- enclosure_id (FK)
+- health_status
+- created_at
+- updated_at
+
+SPECIES
+ENCLOSURES
+FEEDING_LOGS
+HEALTH_RECORDS
+BREEDING_RECORDS
+ENVIRONMENT_LOGS
+
+TASKS
+- task_id
+- title
+- description
+- assigned_to
+- assigned_by
+- status
+- priority
+- due_date
+
+ALERTS
+- alert_id
+- type
+- severity
+- message
+- assigned_to
+- status
+
+NOTIFICATIONS
+- notification_id
+- user_id
+- message
+- is_read
+
+PASSWORD_RESET_TOKENS
+- token
+- user_id
+- expires_at
+
+AUDIT_LOGS
+- log_id
+- user_id
+- action
+- entity
+- entity_id
+- before_data
+- after_data
+- timestamp
+
+==================================================
+3) ROLE & PERMISSION SYSTEM
+==================================================
+
+Roles:
+Admin, Supervisor, Vet, Caretaker, Breeding Officer, Env Tech, Collection Officer, Staff
+
+Permission model:
+- granular (module.action)
+
+Examples:
+user.create, user.read, user.update, user.delete
+profile.update, password.change
+tortoise.create, tortoise.read, tortoise.update, tortoise.delete
+task.assign, task.update, task.resolve
+alert.create, alert.resolve
+
+Rules:
+- Admin: full access
+- Supervisor: management access
+- Others: limited, role-specific access
+
+==================================================
+4) AUTHENTICATION SYSTEM
+==================================================
+
+Implement:
+- login (username + password)
+- logout
+- session persistence (refresh safe)
+- forgot password (token-based)
+- reset password
+- change password (requires current password)
+
+Security:
+- hash passwords (bcrypt/argon2)
+- validate input
+- rate limit login
+- session expiration
+- CSRF protection
+- regenerate session on login
+
+==================================================
+5) MIDDLEWARE DESIGN
+==================================================
+
+Create:
+- requireAuth
+- requirePermission(permission)
+- requireRole(role[])
+- validateRequest(schema)
+- errorHandler
+- auditLogger
+
+Behavior:
+- block unauthorized access (401/403)
+- log denied attempts
+- sanitize input
+
+==================================================
+6) USER & PROFILE MODULE
+==================================================
+
+Endpoints:
+GET /me
+PUT /me/profile
+PUT /me/username
+PUT /me/password
+POST /auth/forgot-password
+POST /auth/reset-password
+
+Admin/Supervisor:
+GET /users
+GET /users/:id
+PUT /users/:id
+DELETE /users/:id
+
+Rules:
+- username must be unique
+- only allowed fields editable
+- audit every change
+
+==================================================
+7) TORTOISE MODULE
+==================================================
+
+Endpoints:
+POST /tortoises
+GET /tortoises
+GET /tortoises/:id
+PUT /tortoises/:id
+DELETE /tortoises/:id
+
+Include:
+- linked data (species, enclosure, health, feeding)
+
+Permission-based access required.
+
+==================================================
+8) TASK SYSTEM
+==================================================
+
+Endpoints:
+POST /tasks
+GET /tasks
+PUT /tasks/:id
+DELETE /tasks/:id
+
+Rules:
+- Supervisor assigns tasks
+- Users update only assigned tasks
+- maintain status history
+
+==================================================
+9) ALERT SYSTEM
+==================================================
+
+Endpoints:
+POST /alerts
+GET /alerts
+PUT /alerts/:id/resolve
+
+Rules:
+- severity levels
+- assign alerts
+- notify users
+
+==================================================
+10) AI & ANALYTICS
+==================================================
+
+Endpoints:
+GET /ai/diagnostics
+GET /ai/network-graph
+
+Logic:
+- anomaly detection on sensor logs
+- predictive analysis via Python microservice
+- safe query generation (no injection)
+
+==================================================
+11) ERROR HANDLING
+==================================================
+
+Centralized handler:
+- 400 validation errors
+- 401 unauthorized
+- 403 forbidden
+- 404 not found
+- 409 conflict (FK / unique)
+- 500 server error
+
+==================================================
+12) AUDIT LOGGING
+==================================================
+
+Track:
+- login/logout
+- CRUD operations
+- permission failures
+- task/alert changes
+
+Store:
+- user_id
+- action
+- entity
+- before/after
+- timestamp
+
+==================================================
+13) OUTPUT REQUIREMENTS
+==================================================
+
+Generate:
+- full project structure
+- Express server setup
+- routes/controllers/services
+- middleware
+- database schema (SQL)
+- seed data (roles + permissions)
+- sample API responses
+- validation logic
+
+Code must be:
+- modular
+- secure
+- production-ready
+- scalable
+
+FINAL RULE:
+Backend only. No frontend UI. No shortcuts. Full secure system with RBAC, audit logging, and proper architecture.

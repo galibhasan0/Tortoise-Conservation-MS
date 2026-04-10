@@ -33,6 +33,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,11 +42,12 @@ const Login: React.FC = () => {
     }
 
     setIsLoading(true);
+    setLoginError('');
     try {
       await login(username, password, selectedRole);
       navigate('/');
-    } catch (error) {
-      console.error('Login failed:', error);
+    } catch (error: any) {
+      setLoginError(error?.message ?? 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -149,6 +151,13 @@ const Login: React.FC = () => {
                   </button>
                 </div>
 
+                {/* Error Message */}
+                {loginError && (
+                  <div className="mb-4 p-3 rounded-lg bg-red-500/20 border border-red-500/40 text-red-300 text-sm">
+                    {loginError}
+                  </div>
+                )}
+
                 {/* Login Button */}
                 <button
                   type="submit"
@@ -162,10 +171,14 @@ const Login: React.FC = () => {
 
               {/* Info Box */}
               <div className="glass-card p-4 border-cyan-500/20 text-sm text-muted-foreground">
-                <p className="font-semibold text-foreground mb-2">Demo Login</p>
-                <p>
-                  Use any username with any password to test the {selectedRole} role dashboard.
-                </p>
+                <p className="font-semibold text-foreground mb-2">Demo Credentials</p>
+                <div className="space-y-1">
+                  <p><span className="text-cyan-400">Admin:</span> admin / admin123</p>
+                  <p><span className="text-cyan-400">Supervisor:</span> supervisor1 / demo123</p>
+                  <p><span className="text-cyan-400">Vet:</span> vet1 / demo123</p>
+                  <p><span className="text-cyan-400">Caretaker:</span> caretaker1 / demo123</p>
+                  <p className="text-xs opacity-60 mt-2">Role is determined by your account, not the selector.</p>
+                </div>
               </div>
             </form>
           </div>

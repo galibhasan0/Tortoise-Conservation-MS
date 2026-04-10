@@ -1,0 +1,250 @@
+MASTER BACKEND SYSTEM INSTRUCTION: PROJECT “AURA-SHELL”
+
+You are a Senior Backend Architect and Security Engineer.
+
+Build ONLY the backend for an AI-Integrated Tortoise Conservation Center Management System. Do not generate frontend UI code except minimal API contracts. Use Node.js + Express, PostgreSQL or MySQL, and optional Python microservice for AI logic.
+
+GOAL
+Create a secure, modular, production-style backend that supports:
+
+* authentication and sessions
+* permission-based RBAC
+* user profile CRUD
+* tortoise profile CRUD
+* feeding, health, breeding, environment, task, alert, notification, and audit modules
+* forgot/reset/change password
+* AI diagnostics and anomaly endpoints
+* safe database access with prepared statements
+* clean JSON APIs for the frontend
+
+ARCHITECTURE
+Use MVC with a service layer:
+
+* routes
+* controllers
+* services
+* middleware
+* validators
+* utils
+* migrations
+* seeders
+* optional ai-service folder
+
+DATABASE DESIGN
+Design or migrate to a strict 3NF schema with indexed foreign keys and timestamps. Core tables:
+
+* ROLES(role_id, role_name, role_code)
+* USERS(user_id, username UNIQUE, password_hash, role_id FK, status, created_at, updated_at)
+* PERMISSIONS(permission_id, permission_key UNIQUE)
+* ROLE_PERMISSIONS(role_id FK, permission_id FK)
+* USER_PROFILES(profile_id, user_id FK UNIQUE, full_name, email, phone, address, avatar, bio)
+* TORTOISE_PROFILES(tortoise_id, tortoise_code UNIQUE, name, species_id FK, date_of_birth, gender, weight, carapace_length, enclosure_id FK, health_status, created_at, updated_at)
+* SPECIES
+* ENCLOSURES
+* FEEDING_LOGS
+* HEALTH_RECORDS
+* BREEDING_RECORDS
+* ENVIRONMENT_LOGS / IOT_LOGS
+* TASKS
+* ALERTS
+* NOTIFICATIONS
+* PASSWORD_RESET_TOKENS
+* AUDIT_LOGS
+
+Use soft delete where appropriate. Track all critical actions in audit logs. Add indexes on foreign keys and frequent filters.
+
+ROLES AND PERMISSIONS
+Roles:
+Admin, Supervisor, Vet, Caretaker, Breeding Officer, Env Tech, Collection Officer, Staff
+
+Use granular permissions in module.action form, for example:
+
+* user.create, user.read, user.update, user.delete, role.assign
+* profile.read, profile.update, password.change, password.reset
+* tortoise.create, tortoise.read, tortoise.update, tortoise.delete
+* feeding.create/read/update/delete
+* health.create/read/update/delete/resolve
+* breeding.create/read/update/delete
+* alert.create/read/update/assign/resolve
+* task.create/read/update/delete/assign/resolve
+* audit.read
+
+Rules:
+
+* Admin has full access
+* Supervisor manages tasks, settings, and user oversight
+* Vet manages health records and emergency alerts
+* Caretaker manages feeding and daily care logs
+* Breeding Officer manages breeding records
+* Env Tech manages environmental and IoT data
+* Collection Officer manages intake and tortoise registration
+* Staff only works on assigned tasks and limited logs
+
+AUTHENTICATION
+Implement:
+
+* login
+* logout
+* session persistence across refresh
+* session timeout on inactivity
+* forgot password
+* reset password via token
+* change password with current password verification
+
+Security:
+
+* hash passwords with bcrypt or argon2
+* regenerate session on login
+* use CSRF protection for state-changing requests
+* validate all inputs
+* rate limit login attempts
+* do not log users out on page refresh
+
+RBAC MIDDLEWARE
+Create middleware for:
+
+* requireAuth
+* requirePermission(permission)
+* requireAnyPermission([...])
+* requireRole([...])
+* ownership / assignment checks
+
+Behavior:
+
+* block unauthorized access with 401/403 JSON
+* log denied access attempts
+* support record-level restrictions where needed
+
+USER AND PROFILE APIs
+Provide APIs for:
+
+* current user profile
+* update own profile
+* update username
+* change password
+* forgot password request
+* reset password
+* admin/supervisor user management
+* list users
+* get user by id
+* update user
+* delete user
+
+Rules:
+
+* username must be unique
+* only allowed fields may be updated
+* all profile changes must be audited
+
+TORTOISE MODULE
+Provide CRUD APIs for:
+
+* create tortoise
+* list tortoises
+* get tortoise by id
+* update tortoise
+* delete/archive tortoise
+* tortoise history endpoints
+
+Include linked data for species, enclosure, health, feeding, breeding, and care history. Enforce permission-based access.
+
+TASKS AND ALERTS
+Tasks:
+
+* create, assign, update, complete, verify, delete
+* Supervisor assigns tasks
+* Staff can update only assigned tasks
+* task status history is required
+* overdue tasks must be queryable
+
+Alerts:
+
+* create, read, update, assign, resolve
+* severity levels: info, warning, high, critical
+* support medical and environmental alerts
+* route alerts to the correct roles
+* store alert action history
+* generate notifications from alerts/tasks
+
+AI AND ANALYTICS
+Provide backend endpoints such as:
+
+* /api/v1/ai/diagnostics
+* /api/v1/ai/network-graph-state
+* habitat metrics endpoints
+* alert summaries
+* population analytics
+* anomaly detection
+
+AI logic:
+
+* detect abnormal IoT readings using SQL window functions or service logic
+* support predictive analysis through Python microservice if needed
+* if natural-language-to-SQL is included, it must be safe and parameterized only
+
+ERROR HANDLING AND SECURITY
+Use centralized error middleware. Return proper codes:
+
+* 400 validation error
+* 401 unauthorized
+* 403 forbidden
+* 404 not found
+* 409 conflict for duplicate or foreign key errors
+* 500 server error
+
+On database errors:
+
+* unique constraint violation -> 409
+* foreign key violation -> 409
+* validation failure -> 400
+
+AUDIT LOGGING
+Track:
+
+* login/logout
+* profile changes
+* password changes
+* CRUD operations
+* task assignment/status changes
+* alert assignment/resolve
+* denied requests
+
+Audit fields:
+
+* actor_user_id
+* role_id
+* action
+* entity_type
+* entity_id
+* before_json
+* after_json
+* timestamp
+* IP address
+* request path
+
+OUTPUT REQUIREMENTS
+Generate:
+
+* full project structure
+* Express app setup
+* route files
+* controllers
+* services
+* middleware
+* validators
+* SQL schema or migration files
+* seed data for roles and permissions
+* audit logging utility
+* error handler
+* API response examples
+
+Code must be:
+
+* clean
+* modular
+* secure
+* production-style
+* ready to connect with the frontend prompt
+
+FINAL RULE
+Backend only. No frontend UI code. No vague explanation. Build a complete secure role-based backend for the Tortoise Conservation Center Management System.
