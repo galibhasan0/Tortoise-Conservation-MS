@@ -1,0 +1,134 @@
+/** @import must precede all other statements */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * AI AURA Theme - Glassmorphism + Glow Design
+   * Tailwind CSS theme expressed as HSL values.
+  */
+  :root {
+    /* AI AURA Base Colors */
+    --aether-void: 230 64% 13%;
+    --aether-cyan: 180 100% 50%;
+    --aether-purple: 300 50% 50%;
+    --aether-indigo: 270 100% 25%;
+    --cobalt-shell: 215 53% 23%;
+    --stardust-white: 223 60% 92%;
+    --cyber-emerald: 132 100% 67%;
+    --etheric-amber: 39 100% 64%;
+
+    /* Semantic Colors */
+    --background: 230 64% 7%;
+    --foreground: 223 60% 92%;
+
+    --card: 230 64% 13%;
+    --card-foreground: 223 60% 92%;
+
+    --popover: 230 64% 13%;
+    --popover-foreground: 223 60% 92%;
+
+    --primary: 180 100% 50%;
+    --primary-foreground: 230 64% 7%;
+
+    --secondary: 300 50% 50%;
+    --secondary-foreground: 223 60% 92%;
+
+    --muted: 215 53% 23%;
+    --muted-foreground: 223 60% 65%;
+
+    --accent: 180 100% 50%;
+    --accent-foreground: 230 64% 7%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 132 100% 67%;
+    --success-foreground: 230 64% 7%;
+
+    --warning: 39 100% 64%;
+    --warning-foreground: 230 64% 7%;
+
+    --border: 215 53% 35%;
+    --input: 230 64% 13%;
+    --ring: 180 100% 50%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 215 53% 23%;
+    --sidebar-foreground: 223 60% 92%;
+    --sidebar-primary: 180 100% 50%;
+    --sidebar-primary-foreground: 230 64% 7%;
+    --sidebar-accent: 300 50% 50%;
+    --sidebar-accent-foreground: 223 60% 92%;
+    --sidebar-border: 215 53% 35%;
+    --sidebar-ring: 180 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    background: linear-gradient(135deg, hsl(230, 64%, 7%) 0%, hsl(215, 53%, 23%) 50%, hsl(270, 100%, 25%) 100%);
+    min-height: 100vh;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(191, 64, 191, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  pre,
+  code {
+    overflow-x: auto;
+    white-space: pre;
+  }
+}
+
+/* Glassmorphism Effects */
+@layer components {
+  .glass-panel {
+    @apply bg-white/10 backdrop-blur-xl border border-white/20 rounded-lg;
+  }
+
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-lg;
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), inset 0 0 20px rgba(0, 255, 255, 0.1);
+  }
+
+  .glow-purple {
+    box-shadow: 0 0 20px rgba(191, 64, 191, 0.5), inset 0 0 20px rgba(191, 64, 191, 0.1);
+  }
+
+  .glow-emerald {
+    box-shadow: 0 0 20px rgba(94, 255, 126, 0.5), inset 0 0 20px rgba(94, 255, 126, 0.1);
+  }
+
+  .glow-amber {
+    box-shadow: 0 0 20px rgba(255, 195, 85, 0.5), inset 0 0 20px rgba(255, 195, 85, 0.1);
+  }
+}
